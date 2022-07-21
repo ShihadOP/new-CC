@@ -1,37 +1,55 @@
-## Welcome to GitHub Pages
+<?php
 
-You can use the [editor on GitHub](https://github.com/ShihadOP/new-CC/edit/main/docs/index.md) to maintain and preview the content for your website in Markdown files.
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Http\Request;
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+define('LARAVEL_START', microtime(true));
 
-### Markdown
+/*
+|--------------------------------------------------------------------------
+| Check If The Application Is Under Maintenance
+|--------------------------------------------------------------------------
+|
+| If the application is in maintenance / demo mode via the "down" command
+| we will load this file so that any pre-rendered content can be shown
+| instead of starting the framework, which could cause an exception.
+|
+*/
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php')) {
+    require $maintenance;
+}
 
-```markdown
-Syntax highlighted code block
+/*
+|--------------------------------------------------------------------------
+| Register The Auto Loader
+|--------------------------------------------------------------------------
+|
+| Composer provides a convenient, automatically generated class loader for
+| this application. We just need to utilize it! We'll simply require it
+| into the script here so we don't need to manually load our classes.
+|
+*/
 
-# Header 1
-## Header 2
-### Header 3
+require __DIR__.'/../vendor/autoload.php';
 
-- Bulleted
-- List
+/*
+|--------------------------------------------------------------------------
+| Run The Application
+|--------------------------------------------------------------------------
+|
+| Once we have the application, we can handle the incoming request using
+| the application's HTTP kernel. Then, we will send the response back
+| to this client's browser, allowing them to enjoy our application.
+|
+*/
 
-1. Numbered
-2. List
+$app = require_once __DIR__.'/../bootstrap/app.php';
 
-**Bold** and _Italic_ and `Code` text
+$kernel = $app->make(Kernel::class);
 
-[Link](url) and ![Image](src)
-```
+$response = $kernel->handle(
+    $request = Request::capture()
+)->send();
 
-For more details see [Basic writing and formatting syntax](https://docs.github.com/en/github/writing-on-github/getting-started-with-writing-and-formatting-on-github/basic-writing-and-formatting-syntax).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/ShihadOP/new-CC/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+$kernel->terminate($request, $response);
